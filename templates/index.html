@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Analyzer | Premium ATS Tool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..600;1,9..40,300..600&family=DM+Serif+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0d0f;
+            --bg-card: #141416;
+            --bg-elevated: #1a1a1e;
+            --bg-hover: #1f1f24;
+            --border: rgba(255,255,255,0.07);
+            --border-hover: rgba(255,255,255,0.15);
+            --border-accent: rgba(234,179,8,0.35);
+            --text-primary: #f0ede8;
+            --text-secondary: #a09c96;
+            --text-muted: #5c5855;
+            --amber: #e8a020;
+            --amber-glow: rgba(232,160,32,0.12);
+            --amber-border: rgba(232,160,32,0.25);
+            --green: #22c55e;
+            --green-bg: rgba(34,197,94,0.08);
+            --green-border: rgba(34,197,94,0.2);
+            --red: #f87171;
+            --red-bg: rgba(248,113,113,0.08);
+            --red-border: rgba(248,113,113,0.2);
+            --radius: 10px;
+            --radius-lg: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background Effects */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: -30vh;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80vw;
+            height: 60vh;
+            background: radial-gradient(ellipse at center, rgba(232,160,32,0.06), transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .app-wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 28px 80px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 700px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'DM Serif Display', serif;
+            letter-spacing: -0.02em;
+        }
+
+        header {
+            padding: 40px 0 32px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 48px;
+        }
+
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--amber);
+            background: var(--amber-glow);
+            border: 1px solid var(--amber-border);
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            padding: 4px 12px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        .badge-pill .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--amber);
+            border-radius: 50%;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.5; }
+        }
+
+        h1 {
+            font-size: clamp(28px, 5vw, 42px);
+            font-weight: 400;
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+
+        h1 em {
+            color: var(--amber);
+            font-style: italic;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            transition: border-color 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .section-label {
+            display: flex;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            gap: 12px;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .upload-zone {
+            position: relative;
+            border: 1.5px dashed var(--border-hover);
+            border-radius: var(--radius);
+            padding: 28px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .upload-zone::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--amber-glow);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+
+        .upload-zone:hover, .upload-zone.drag-over {
+            border-color: var(--amber-border);
+        }
+
+        .upload-zone:hover::before, .upload-zone.drag-over::before {
+            opacity: 1;
+        }
+
+        .upload-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-hover);
+            border-radius: 10px;
+            font-size: 18px;
+            margin: 0 auto 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .upload-text-primary {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .upload-text-muted {
+            color: var(--text-muted);
+            font-size: 11px;
+            position: relative;
+            z-index: 1;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .file-selected {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--green-bg);
+            border: 1px solid var(--green-border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13.5px;
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        .file-info span:first-child {
+            color: var(--green);
+        }
+
+        .filename {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+        }
+
+        .remove-file:hover {
+            color: var(--red);
+        }
+
+        textarea {
+            width: 100%;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px;
+            font: inherit;
+            font-size: 13.5px;
+            color: var(--text-primary);
+            min-height: 150px;
+            resize: vertical;
+            margin-bottom: 16px;
+            transition: border-color 0.2s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--border-hover);
+        }
+
+        textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn-analyze {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            background: var(--amber);
+            color: #0d0d0f;
+            border: none;
+            border-radius: var(--radius);
+            padding: 13px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s ease, opacity 0.2s ease;
+            overflow: hidden;
+        }
+
+        .btn-analyze::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.15);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+
+        .btn-analyze:hover::before {
+            opacity: 1;
+        }
+
+        .btn-analyze:active {
+            transform: scale(0.98);
+        }
+
+        .btn-analyze:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0,0,0,0.2);
+            border-top-color: #0d0d0f;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .tips-card {
+            margin-top: 16px;
+        }
+
+        .tips-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .tip-item {
+            display: flex;
+            gap: 12px;
+            align-items: baseline;
+        }
+
+        .tip-num {
+            color: var(--amber);
+            font-size: 11px;
+            font-weight: 600;
+            font-family: monospace;
+        }
+
+        .tip-text {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .results-panel {
+            position: relative;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            transition: opacity 0.3s ease;
+        }
+
+        .empty-symbol {
+            font-size: 32px;
+            opacity: 0.3;
+            margin-bottom: 12px;
+        }
+
+        .empty-title {
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .empty-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .results-content {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .result-section {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity 0.45s ease, transform 0.45s ease;
+        }
+
+        .result-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .score-card {
+            position: relative;
+            text-align: center;
+            padding: 32px 24px;
+            overflow: hidden;
+        }
+
+        .score-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(ellipse, rgba(34,197,94,0.15), transparent 70%);
+            opacity: 0;
+            transition: opacity 1s ease;
+            pointer-events: none;
+        }
+
+        .score-card.visible .score-glow {
+            opacity: 1;
+        }
+
+        .score-ring-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 16px;
+        }
+
+        .score-ring {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .score-track {
+            fill: none;
+            stroke: var(--bg-elevated);
+            stroke-width: 8;
+        }
+
+        .score-fill {
+            fill: none;
+            stroke: var(--green);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 0 339.3;
+            transition: stroke-dasharray 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .score-text-container {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-number {
+            font-family: 'DM Serif Display', serif;
+            font-size: 44px;
+            line-height: 1;
+        }
+
+        .score-max {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .score-reason {
+            font-size: 13.5px;
+            color: var(--text-secondary);
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .badges-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .count-badge {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 1px 8px;
+            margin-left: 8px;
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        .keyword-badge {
+            border-radius: 6px;
+            padding: 4px 11px;
+            font-size: 12px;
+            transition: transform 0.2s ease;
+            cursor: default;
+        }
+
+        .keyword-badge.matched {
+            background: var(--green-bg);
+            color: var(--green);
+            border: 1px solid var(--green-border);
+        }
+
+        .keyword-badge.missing {
+            background: var(--red-bg);
+            color: var(--red);
+            border: 1px solid var(--red-border);
+        }
+
+        .list-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .strength-accent {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .strength-text, .improvement-text {
+            font-size: 13.5px;
+            color: var(--text-secondary);
+        }
+
+        .improvement-tag {
+            background: var(--amber-glow);
+            color: var(--amber);
+            border: 1px solid var(--amber-border);
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 3px 9px;
+            margin-bottom: 6px;
+            display: inline-block;
+        }
+
+        .verdict {
+            border-left: 2px solid var(--amber);
+            background: var(--amber-glow);
+            border-radius: 0 var(--radius) var(--radius) 0;
+            padding: 16px 18px;
+            font-family: 'DM Serif Display', serif;
+            font-style: italic;
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-primary);
+        }
+
+        .error-toast {
+            display: none;
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--red-bg);
+            color: var(--red);
+            border: 1px solid var(--red-border);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            z-index: 1000;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-wrap">
+        <header>
+            <div class="badge-pill">
+                <span class="dot"></span>
+                AI-Powered · NVIDIA NIM
+            </div>
+            <h1>Resume <em>Analyzer</em></h1>
+            <div class="subtitle">Evaluate your resume against specific job requirements instantly using AI.</div>
+        </header>
+
+        <main class="main-grid">
+            <div class="left-panel">
+                <div class="card">
+                    <div class="section-label">1. Upload Resume</div>
+                    
+                    <div class="upload-zone" id="drop-zone">
+                        <div class="upload-icon">📄</div>
+                        <div class="upload-text-primary">Drop your PDF here</div>
+                        <div class="upload-text-muted">or click to browse · PDF only</div>
+                        <input type="file" id="file-input" accept="application/pdf">
+                    </div>
+
+                    <div class="file-selected" id="file-selected">
+                        <div class="file-info">
+                            <span>✓</span>
+                            <span class="filename" id="filename">resume.pdf</span>
+                        </div>
+                        <button class="remove-file" id="remove-file">×</button>
+                    </div>
+
+                    <div class="section-label" style="margin-top: 24px;">2. Job Description</div>
+                    <textarea id="jd-input" placeholder="Paste the job requirements here..."></textarea>
+
+                    <button class="btn-analyze" id="analyze-btn" disabled>
+                        <span class="spinner" id="btn-spinner"></span>
+                        <span id="btn-text">Analyze Fit</span>
+                    </button>
+                </div>
+
+                <div class="card tips-card">
+                    <div class="section-label">Pro Tips</div>
+                    <div class="tips-list">
+                        <div class="tip-item">
+                            <span class="tip-num">01</span>
+                            <span class="tip-text">Ensure your PDF is text-selectable for accurate parsing.</span>
+                        </div>
+                        <div class="tip-item">
+                            <span class="tip-num">02</span>
+                            <span class="tip-text">Include specific technical skills in your job description.</span>
+                        </div>
+                        <div class="tip-item">
+                            <span class="tip-num">03</span>
+                            <span class="tip-text">Optimize your resume for missing keywords revealed below.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-panel">
+                <div class="card empty-state" id="empty-state">
+                    <div class="empty-symbol">◎</div>
+                    <div class="empty-title">Awaiting Analysis</div>
+                    <div class="empty-subtitle">Upload a resume and job description to begin the evaluation.</div>
+                </div>
+
+                <div class="results-content" id="results-content">
+                    
+                    <div class="card score-card result-section" id="section-score">
+                        <div class="score-glow" id="score-glow"></div>
+                        <div class="section-label">Match Score</div>
+                        <div class="score-ring-container">
+                            <svg class="score-ring" viewBox="0 0 120 120">
+                                <circle class="score-track" cx="60" cy="60" r="54"></circle>
+                                <circle class="score-fill" id="score-circle" cx="60" cy="60" r="54"></circle>
+                            </svg>
+                            <div class="score-text-container">
+                                <div class="score-number" id="score-number">0</div>
+                                <div class="score-max">/ 100</div>
+                            </div>
+                        </div>
+                        <div class="score-reason" id="score-reason">Calculating...</div>
+                    </div>
+
+                    <div class="card result-section" id="section-matched">
+                        <div class="section-label">
+                            Matched Keywords <span class="count-badge" id="matched-count">0</span>
+                        </div>
+                        <div class="badges-container" id="matched-badges"></div>
+                    </div>
+
+                    <div class="card result-section" id="section-missing">
+                        <div class="section-label">
+                            Missing Keywords <span class="count-badge" id="missing-count">0</span>
+                        </div>
+                        <div class="badges-container" id="missing-badges"></div>
+                    </div>
+
+                    <div class="card result-section" id="section-strengths">
+                        <div class="section-label">Key Strengths</div>
+                        <div id="strengths-list"></div>
+                    </div>
+
+                    <div class="card result-section" id="section-improvements">
+                        <div class="section-label">Areas to Improve</div>
+                        <div id="improvements-list"></div>
+                    </div>
+
+                    <div class="result-section verdict" id="section-verdict"></div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="error-toast" id="error-toast"></div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileSelected = document.getElementById('file-selected');
+        const filenameDisplay = document.getElementById('filename');
+        const removeFileBtn = document.getElementById('remove-file');
+        const jdInput = document.getElementById('jd-input');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnSpinner = document.getElementById('btn-spinner');
+        
+        const emptyState = document.getElementById('empty-state');
+        const resultsContent = document.getElementById('results-content');
+        const resultSections = document.querySelectorAll('.result-section');
+        const scoreCircle = document.getElementById('score-circle');
+        const scoreNumber = document.getElementById('score-number');
+        const scoreGlow = document.getElementById('score-glow');
+        const scoreReason = document.getElementById('score-reason');
+        const errorToast = document.getElementById('error-toast');
+
+        let selectedFile = null;
+
+        function updateAnalyzeButtonState() {
+            analyzeBtn.disabled = !(selectedFile && jdInput.value.trim().length > 10);
+        }
+
+        function showError(msg) {
+            errorToast.textContent = msg;
+            errorToast.style.display = 'block';
+            setTimeout(() => { errorToast.style.display = 'none'; }, 4000);
+        }
+
+        function handleFileSelect(file) {
+            if (file && file.type === 'application/pdf') {
+                selectedFile = file;
+                filenameDisplay.textContent = file.name;
+                dropZone.style.display = 'none';
+                fileSelected.style.display = 'flex';
+                updateAnalyzeButtonState();
+            } else {
+                showError('Please upload a valid PDF file.');
+            }
+        }
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('drag-over'); });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) handleFileSelect(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => { if (e.target.files.length) handleFileSelect(e.target.files[0]); });
+        removeFileBtn.addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            dropZone.style.display = 'block';
+            fileSelected.style.display = 'none';
+            updateAnalyzeButtonState();
+        });
+        jdInput.addEventListener('input', updateAnalyzeButtonState);
+
+        analyzeBtn.addEventListener('click', async () => {
+            // Prepare UI
+            analyzeBtn.disabled = true;
+            btnText.textContent = 'Analyzing...';
+            btnSpinner.style.display = 'inline-block';
+            emptyState.style.display = 'none';
+            resultsContent.style.display = 'flex';
+            resultSections.forEach(sec => sec.classList.remove('visible'));
+            document.getElementById('section-verdict').classList.remove('visible');
+
+            const formData = new FormData();
+            formData.append('resume', selectedFile);
+            formData.append('jd', jdInput.value);
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) throw new Error(data.error || 'Analysis failed');
+
+                // Update UI with real data
+                updateResultsUI(data);
+
+            } catch (err) {
+                showError(err.message);
+                emptyState.style.display = 'block';
+                resultsContent.style.display = 'none';
+            } finally {
+                analyzeBtn.disabled = false;
+                btnText.textContent = 'Analyze Fit';
+                btnSpinner.style.display = 'none';
+            }
+        });
+
+        function updateResultsUI(data) {
+            // Score
+            scoreReason.textContent = data.score_reason;
+            
+            // Matched
+            const matchedContainer = document.getElementById('matched-badges');
+            matchedContainer.innerHTML = '';
+            data.matched_keywords.forEach(kw => {
+                const span = document.createElement('span');
+                span.className = 'keyword-badge matched';
+                span.textContent = kw;
+                matchedContainer.appendChild(span);
+            });
+            document.getElementById('matched-count').textContent = data.matched_keywords.length;
+
+            // Missing
+            const missingContainer = document.getElementById('missing-badges');
+            missingContainer.innerHTML = '';
+            data.missing_keywords.forEach(kw => {
+                const span = document.createElement('span');
+                span.className = 'keyword-badge missing';
+                span.textContent = kw;
+                missingContainer.appendChild(span);
+            });
+            document.getElementById('missing-count').textContent = data.missing_keywords.length;
+
+            // Strengths
+            const strengthsContainer = document.getElementById('strengths-list');
+            strengthsContainer.innerHTML = '';
+            data.strengths.forEach(s => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `<div class="strength-accent"></div><div class="strength-text">${s}</div>`;
+                strengthsContainer.appendChild(div);
+            });
+
+            // Improvements
+            const impContainer = document.getElementById('improvements-list');
+            impContainer.innerHTML = '';
+            data.improvements.forEach(i => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.style.flexDirection = 'column';
+                div.style.alignItems = 'flex-start';
+                div.style.gap = '4px';
+                div.innerHTML = `<span class="improvement-tag">${i.section}</span><div class="improvement-text">${i.suggestion}</div>`;
+                impContainer.appendChild(div);
+            });
+
+            // Verdict
+            const verdictEl = document.getElementById('section-verdict');
+            verdictEl.textContent = `"${data.overall_verdict}"`;
+
+            // Reveal
+            void resultsContent.offsetWidth; 
+            resultSections.forEach(sec => sec.classList.add('visible'));
+            verdictEl.classList.add('visible');
+            animateScore(data.ats_score);
+        }
+
+        function animateScore(targetScore) {
+            let color = 'var(--green)';
+            let glowColor = 'rgba(34,197,94,0.15)';
+            if (targetScore < 40) {
+                color = 'var(--red)';
+                glowColor = 'rgba(248,113,113,0.15)';
+            } else if (targetScore < 70) {
+                color = 'var(--amber)';
+                glowColor = 'rgba(232,160,32,0.15)';
+            }
+
+            scoreCircle.style.stroke = color;
+            scoreGlow.style.background = `radial-gradient(ellipse, ${glowColor}, transparent 70%)`;
+            const circumference = 339.3;
+            const fillLength = (targetScore / 100) * circumference;
+            
+            setTimeout(() => {
+                scoreCircle.style.strokeDasharray = `${fillLength} ${circumference}`;
+                let currentNum = 0;
+                const duration = 1200; 
+                const steps = 60;
+                const increment = targetScore / steps;
+                const counter = setInterval(() => {
+                    currentNum += increment;
+                    if (currentNum >= targetScore) {
+                        scoreNumber.textContent = targetScore;
+                        clearInterval(counter);
+                    } else {
+                        scoreNumber.textContent = Math.floor(currentNum);
+                    }
+                }, duration / steps);
+            }, 50);
+        }
+    </script>
+</body>
+</html>
